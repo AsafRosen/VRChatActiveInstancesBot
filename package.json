@@ -1,0 +1,14 @@
+{
+  "name": "vrchat_active_instances_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "discord.js": "^12.5.3"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
