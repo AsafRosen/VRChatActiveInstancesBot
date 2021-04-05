@@ -1,25 +1,37 @@
-import dotenv from 'dotenv';
-import Discord from "discord.js";
+import dotenv from "dotenv";
+import * as discordBot from "./discordBot.js";
+import * as vrcBot from "./vrcBot.js";
 
 dotenv.config();
-const client = new Discord.Client();
 
 async function init() {
-    try {
-      if (!process.env.DISCORD_CLIENT_TOKEN) {
-        throw new Error("DISCORD_CLIENT_TOKEN is not set in the .env file");
-      }
+  try {
+    await discordBot.init();
 
-      await client.login(process.env.DISCORD_CLIENT_TOKEN);
+    const friendsStatus = await vrcBot.getFriendsStatus();
+    console.log(friendsStatus);
 
-      const channel = await client.channels.fetch(
-        process.env.DISCORD_ACTIVITY_STATUS_CHANNEL
-      );
-
-      channel.send("test");
-    } catch (ex) {
-      console.error("Error while initializing!", ex);
-    }
+    discordBot.postMessage({
+      embed: {
+        title: "World Name",
+        description: "`Instance ID` [Join Here](http://google.com)",
+        color: 3278000,
+        timestamp: "2021-04-05T11:54:53.350Z",
+        fields: [
+          {
+            name: "Currently Online",
+            value: "Person\nPerson\nPerson\nPerson",
+          },
+          {
+            name: "Raw JSON",
+            value: "```" + JSON.stringify(friendsStatus) + "```",
+          },
+        ],
+      },
+    });
+  } catch (ex) {
+    console.error("Error while initializing!", ex);
+  }
 }
 
 init();
