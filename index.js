@@ -4,12 +4,18 @@ import * as statusUpdaterJob from './statusUpdaterJob.js'
 
 dotenv.config();
 
+let updaterJobInterval;
+
 async function init() {
   try {
     await discordBot.init();
+    await discordBot.clearAllBotMessages();
 
-    statusUpdaterJob.run();
+    await statusUpdaterJob.run();
     
+    updaterJobInterval = setInterval(async () => {
+        await statusUpdaterJob.run();
+    }, 60000)
 
   } catch (ex) {
     console.error("Error while initializing!", ex);

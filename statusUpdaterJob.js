@@ -36,6 +36,6 @@ export async function run() {
             "url": world.thumbnailImageUrl
           },
       },
-    });
+    }, instance);
   }
 }

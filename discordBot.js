@@ -3,6 +3,8 @@ import Discord from "discord.js";
 const client = new Discord.Client();
 let channel = null;
 
+const fixedMessages = {};
+
 export async function init() {
   if (!process.env.DISCORD_CLIENT_TOKEN) {
     throw new Error("DISCORD_CLIENT_TOKEN is not set in the .env file");
@@ -19,6 +21,23 @@ export async function init() {
   );
 }
 
-export async function postMessage(content) {
-  return await channel.send(content);
+export async function postMessage(content, fixedMessageId) {
+  if (fixedMessages[fixedMessageId]) {
+    const currentMessage = fixedMessages[fixedMessageId];
+    const newMessage = await currentMessage.edit(content);
+    fixedMessages[fixedMessageId] = newMessage;
+  }
+  else {
+    const newMessage = await channel.send(content);
+    fixedMessages[fixedMessageId] = newMessage;
+  }
+}
+
+export async function clearAllBotMessages() {
+  const allMessages = await channel.messages.fetch();
+  const botMessages = allMessages.filter(m => m.author.id === client.user.id)
+
+  for (const [_, message] of botMessages) {
+    message.delete();
+  }
 }
