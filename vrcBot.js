@@ -5,10 +5,12 @@ let authenticated = false;
 async function fetch(url, params) {
   try {
     const response = await cloudscraper.get(url, {
-      auth: authenticated ? undefined : {
-        username: process.env.VRCHAT_BOT_USERNAME,
-        password: process.env.VRCHAT_BOT_PASSWORD,
-      },
+      auth: authenticated
+        ? undefined
+        : {
+            username: process.env.VRCHAT_BOT_USERNAME,
+            password: process.env.VRCHAT_BOT_PASSWORD,
+          },
       qs: {
         apiKey: "JlE5Jldo5Jibnk5O5hTx6XVqsJu4WJ26",
         ...params,
@@ -16,7 +18,7 @@ async function fetch(url, params) {
     });
 
     if (!authenticated) {
-        authenticated = true;
+      authenticated = true;
     }
 
     return JSON.parse(response);
@@ -26,10 +28,19 @@ async function fetch(url, params) {
 }
 
 export async function signIn() {
-   return await fetch("https://api.vrchat.cloud/api/1/auth/user");
-
+  return await fetch("https://api.vrchat.cloud/api/1/auth/user");
 }
 
-export async function getFriendsStatus() {
-  return await fetch("https://api.vrchat.cloud/api/1/auth/user/friends");
+export async function getOnlineFriends() {
+  return await fetch("https://api.vrchat.cloud/api/1/auth/user/friends", {
+    offline: false,
+  });
+}
+
+export async function getInstanceDetails(id) {
+  return await fetch("https://api.vrchat.cloud/api/1/instances/" + id);
+}
+
+export async function getWorldDetails(id) {
+  return await fetch("https://api.vrchat.cloud/api/1/worlds/" + id);
 }

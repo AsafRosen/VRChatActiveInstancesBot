@@ -8,6 +8,7 @@
     "cloudscraper": "^4.6.0",
     "discord.js": "^12.5.3",
     "dotenv": "^8.2.0",
+    "group-by": "0.0.1",
     "request": "^2.88.2"
   },
   "devDependencies": {},
