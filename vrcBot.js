@@ -1,24 +1,35 @@
-import axios from "axios";
-
-axios.defaults.withCredentials = true;
+import cloudscraper from "cloudscraper";
 
 let authenticated = false;
 
 async function fetch(url, params) {
-  const response = await axios.get(url, {
-    auth: authenticated ? undefined : {
-      username: process.env.VRCHAT_BOT_USERNAME,
-      password: process.env.VRCHAT_BOT_PASSWORD,
-    },
-    params: {
-      apiKey: "JlE5Jldo5Jibnk5O5hTx6XVqsJu4WJ26",
-      ...params,
-    },
-  });
+  try {
+    const response = await cloudscraper.get(url, {
+      auth: authenticated ? undefined : {
+        username: process.env.VRCHAT_BOT_USERNAME,
+        password: process.env.VRCHAT_BOT_PASSWORD,
+      },
+      qs: {
+        apiKey: "JlE5Jldo5Jibnk5O5hTx6XVqsJu4WJ26",
+        ...params,
+      },
+    });
 
-  return response.data;
+    if (!authenticated) {
+        authenticated = true;
+    }
+
+    return JSON.parse(response);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function signIn() {
+   return await fetch("https://api.vrchat.cloud/api/1/auth/user");
+
 }
 
 export async function getFriendsStatus() {
-    return await fetch("https://vrchat.com/api/1/auth/user/friends");
+  return await fetch("https://api.vrchat.cloud/api/1/auth/user/friends");
 }
