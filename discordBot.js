@@ -23,13 +23,14 @@ export async function init() {
 
 export async function postMessage(content, fixedMessageId) {
   if (fixedMessages[fixedMessageId]) {
-    const currentMessage = fixedMessages[fixedMessageId];
+    const currentMessageID = fixedMessages[fixedMessageId];
+    const currentMessage = await channel.messages.fetch(currentMessageID);
     const newMessage = await currentMessage.edit(content);
-    fixedMessages[fixedMessageId] = newMessage;
+    fixedMessages[fixedMessageId] = newMessage.id;
   }
   else {
     const newMessage = await channel.send(content);
-    fixedMessages[fixedMessageId] = newMessage;
+    fixedMessages[fixedMessageId] = newMessage.id;
   }
 }
 
@@ -39,5 +40,22 @@ export async function clearAllBotMessages() {
 
   for (const [_, message] of botMessages) {
     message.delete();
+  }
+}
+
+export async function clearMessagesNotInIDs(fixedMessageIds) {
+  const messagesToRemove = Object.keys(fixedMessages).filter(fixedMessage => !fixedMessageIds.includes(fixedMessage));
+
+  for (const messageToRemoveId of messagesToRemove) {
+    const messageId = fixedMessages[messageToRemoveId];
+    try {
+      const message = await channel.messages.fetch(messageId);
+      await message.delete();
+    }
+    catch (error) {
+      console.error('Failed to delete message: ', messageId);
+    }
+
+    delete fixedMessages[messageToRemoveId];
   }
 }
