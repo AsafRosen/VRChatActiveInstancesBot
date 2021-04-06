@@ -4,8 +4,7 @@ import groupBy from "group-by";
 
 export async function run() {
   try {
-    console.info("Running status updater job");
-    await vrcBot.signIn();
+    console.info(`[${new Date().toISOString()}] Running status updater job`);
     const friendStatuses = await vrcBot.getOnlineFriends();
     const onlineFriends = friendStatuses
       .filter((status) => status != null)
@@ -16,7 +15,12 @@ export async function run() {
       (status) => status.location
     );
 
-    friendsByInstance = friendsByInstance.filter(friendsInInstance => friendsInInstance.length > 1);
+    friendsByInstance = Object.keys(friendsByInstance).reduce((agg, instance) => {
+        if (friendsByInstance[instance].length > 1) {
+            agg[instance] = friendsByInstance[instance];
+        }
+        return agg;
+    }, {});
 
     console.info(
       `[${new Date().toISOString()}] Found ${Object.keys(friendsByInstance).length} active instances among ${
