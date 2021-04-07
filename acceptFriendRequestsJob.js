@@ -1,7 +1,6 @@
 import * as vrcBot from "./vrcBot.js";
 
 export async function run() {
-  console.info(`[${new Date().toISOString()}] Running friend requests job`);
   let notifications = await vrcBot.getNotifications();
   notifications = notifications.filter(
     (notification) => notification.type === "friendRequest"

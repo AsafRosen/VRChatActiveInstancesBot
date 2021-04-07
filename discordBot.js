@@ -59,3 +59,7 @@ export async function clearMessagesNotInIDs(fixedMessageIds) {
     delete fixedMessages[messageToRemoveId];
   }
 }
+
+export function getFixedMessages() {
+  return fixedMessages;
+}

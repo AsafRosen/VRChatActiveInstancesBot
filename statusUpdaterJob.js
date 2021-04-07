@@ -2,30 +2,27 @@ import * as vrcBot from "./vrcBot.js";
 import * as discordBot from "./discordBot.js";
 import groupBy from "group-by";
 
+function arrayEquals(a, b) {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
 export async function run() {
   try {
-    console.info(`[${new Date().toISOString()}] Running status updater job`);
     const friendStatuses = await vrcBot.getOnlineFriends();
     const onlineFriends = friendStatuses
       .filter((status) => status != null)
       .filter((status) => status.location !== "offline");
 
-    let friendsByInstance = groupBy(
-      onlineFriends,
-      (status) => status.location
-    );
+    let friendsByInstance = groupBy(onlineFriends, (status) => status.location);
 
-    friendsByInstance = Object.keys(friendsByInstance).reduce((agg, instance) => {
+    friendsByInstance = Object.keys(friendsByInstance).reduce(
+      (agg, instance) => {
         if (friendsByInstance[instance].length > 1) {
-            agg[instance] = friendsByInstance[instance];
+          agg[instance] = friendsByInstance[instance];
         }
         return agg;
-    }, {});
-
-    console.info(
-      `[${new Date().toISOString()}] Found ${Object.keys(friendsByInstance).length} active instances among ${
-        onlineFriends.length
-      } active friends`
+      },
+      {}
     );
 
     for (const [instance, users] of Object.entries(friendsByInstance)) {
@@ -49,20 +46,37 @@ export async function run() {
             description:
               instance === "private"
                 ? null
-                : `[Link to instance](https://vrchat.com/home/launch?worldId=${world.id}&instanceId=${instanceDetails.instanceId})`,
+                : `[Link to instance](https://vrchat.com/home/launch?worldId=${
+                    world.id
+                  }&instanceId=${encodeURIComponent(
+                    instanceDetails.instanceId
+                  )})`,
             timestamp: new Date().toISOString(),
             fields: [
               {
                 name: "Currently Online",
-                value: users.map((user) => user.displayName).join("\n"),
+                value: `${users.length} people`,
               },
             ],
-            thumbnail: {
-              url: world.thumbnailImageUrl,
+            image: {
+              url: world.imageUrl,
             },
           },
         },
         instance
+      );
+    }
+
+    if (
+      !arrayEquals(
+        Object.keys(friendsByInstance),
+        Object.keys(discordBot.getFixedMessages())
+      )
+    ) {
+      console.info(
+        `[${new Date().toISOString()}] Active Instances Changed: [${
+          Object.keys(friendsByInstance).join(', ')
+        }]`
       );
     }
 
