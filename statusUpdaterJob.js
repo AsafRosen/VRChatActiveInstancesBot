@@ -25,6 +25,19 @@ export async function run() {
       {}
     );
 
+    if (
+      !arrayEquals(
+        Object.keys(friendsByInstance),
+        Object.keys(discordBot.getFixedMessages())
+      )
+    ) {
+      console.info(
+        `[${new Date().toISOString()}] Active Instances Changed: [${Object.keys(
+          friendsByInstance
+        ).join(", ")}]`
+      );
+    }
+
     for (const [instance, users] of Object.entries(friendsByInstance)) {
       let world, instanceDetails;
       if (instance === "private") {
@@ -67,18 +80,6 @@ export async function run() {
       );
     }
 
-    if (
-      !arrayEquals(
-        Object.keys(friendsByInstance),
-        Object.keys(discordBot.getFixedMessages())
-      )
-    ) {
-      console.info(
-        `[${new Date().toISOString()}] Active Instances Changed: [${
-          Object.keys(friendsByInstance).join(', ')
-        }]`
-      );
-    }
 
     await discordBot.clearMessagesNotInIDs(Object.keys(friendsByInstance));
   } catch (error) {
