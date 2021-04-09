@@ -13,7 +13,14 @@ export async function run() {
       .filter((status) => status != null)
       .filter((status) => status.location !== "offline");
 
-    let friendsByInstance = groupBy(onlineFriends, (status) => status.location);
+    const joinableFriends = onlineFriends.filter(
+      (status) => status.location !== "private"
+    );
+
+    let friendsByInstance = groupBy(
+      joinableFriends,
+      (status) => status.location
+    );
 
     friendsByInstance = Object.keys(friendsByInstance).reduce(
       (agg, instance) => {
@@ -79,7 +86,6 @@ export async function run() {
         instance
       );
     }
-
 
     await discordBot.clearMessagesNotInIDs(Object.keys(friendsByInstance));
   } catch (error) {
