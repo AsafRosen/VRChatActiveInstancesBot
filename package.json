@@ -11,7 +11,9 @@
     "group-by": "0.0.1",
     "request": "^2.88.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^7.24.0"
+  },
   "scripts": {},
   "keywords": [],
   "author": "",
