@@ -23,7 +23,7 @@ async function postInstanceDetails(instance, users) {
         fields: [
           {
             name: "Currently Online",
-            value: `${users.length} friends, ${instanceDetails.occupants} players`,
+            value: `${users.length} friends, ${instanceDetails.n_users} players`,
           },
         ],
         image: {
@@ -82,7 +82,7 @@ export async function run() {
 
     if (
       !arrayEquals(
-        Object.keys(friendsByInstance).concat("online"),
+        Object.keys(friendsByInstance).concat(["online"]),
         Object.keys(discordBot.getFixedMessages())
       )
     ) {
