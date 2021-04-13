@@ -22,8 +22,12 @@ async function postInstanceDetails(instance, users) {
         timestamp: new Date().toISOString(),
         fields: [
           {
-            name: "Currently Online",
+            name: "Online Numbers",
             value: `${users.length} friends, ${instanceDetails.n_users} players`,
+          },
+          {
+            name: "Who is in here?",
+            value: `${users.map(user => user.displayName).join('\n')}`,
           },
         ],
         image: {
@@ -42,8 +46,12 @@ async function postOnlineFriends(onlineFriends) {
         timestamp: new Date().toISOString(),
         fields: [
           {
-            name: "Currently Online",
+            name: "Online Numbers",
             value: `${onlineFriends.length} friends`,
+          },
+          {
+            name: "Who's online?",
+            value: `${onlineFriends.map(user => user.displayName).join('\n')}`,
           },
         ],
       },
@@ -82,7 +90,7 @@ export async function run() {
 
     if (
       !arrayEquals(
-        Object.keys(friendsByInstance).concat(["online"]),
+        ["online"].concat(Object.keys(friendsByInstance)),
         Object.keys(discordBot.getFixedMessages())
       )
     ) {
