@@ -51,7 +51,7 @@ async function postOnlineFriends(onlineFriends) {
           },
           {
             name: "Who's online?",
-            value: `${onlineFriends.map(user => user.displayName).join('\n')}`,
+            value: `${onlineFriends.map(user => user.displayName).join('\n')}` ?? 'No one',
           },
         ],
       },
