@@ -6,6 +6,24 @@ function arrayEquals(a, b) {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
+function renderUserList(users) {
+  if (!users || users.length === 0) {
+    return "No one";
+  }
+
+  const userList = users
+    .map(
+      (user) => `[${user.displayName}](https://vrchat.com/home/user/${user.id})`
+    )
+    .join("\n");
+
+  if (userList.length < 1024) {
+    return userList;
+  }
+
+  return users.map((user) => user.displayName).join("\n");
+}
+
 async function postInstanceDetails(instance, users) {
   let world, instanceDetails;
 
@@ -16,18 +34,15 @@ async function postInstanceDetails(instance, users) {
     {
       embed: {
         title: `${world.name} ${instanceDetails.name}`,
-        description: `[Link to instance](https://vrchat.com/home/launch?worldId=${
+        url: `https://vrchat.com/home/launch?worldId=${
           world.id
-        }&instanceId=${encodeURIComponent(instanceDetails.instanceId)})`,
+        }&instanceId=${encodeURIComponent(instanceDetails.instanceId)}`,
+        description: `Online: ${users.length} friends, ${instanceDetails.n_users} players`,
         timestamp: new Date().toISOString(),
         fields: [
           {
-            name: "Online Numbers",
-            value: `${users.length} friends, ${instanceDetails.n_users} players`,
-          },
-          {
             name: "Who is in here?",
-            value: `${users.map(user => user.displayName).join('\n')}`,
+            value: renderUserList(users),
           },
         ],
         image: {
@@ -43,15 +58,13 @@ async function postOnlineFriends(onlineFriends) {
   await discordBot.postMessage(
     {
       embed: {
+        title: "Online People",
+        description: `${onlineFriends.length} friends`,
         timestamp: new Date().toISOString(),
         fields: [
           {
-            name: "Online Numbers",
-            value: `${onlineFriends.length} friends`,
-          },
-          {
             name: "Who's online?",
-            value: `${onlineFriends.map(user => user.displayName).join('\n')}` ?? 'No one',
+            value: renderUserList(onlineFriends),
           },
         ],
       },
@@ -105,7 +118,9 @@ export async function run() {
       postInstanceDetails(instance, users);
     }
 
-    await discordBot.clearMessagesNotInIDs(Object.keys(friendsByInstance).concat(['online']));
+    await discordBot.clearMessagesNotInIDs(
+      Object.keys(friendsByInstance).concat(["online"])
+    );
   } catch (error) {
     console.error("Update job failed", error);
   }
