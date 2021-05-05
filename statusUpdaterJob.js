@@ -2,6 +2,14 @@ import * as vrcBot from "./vrcBot.js";
 import * as discordBot from "./discordBot.js";
 import groupBy from "group-by";
 
+
+const STATUS_TO_EMOJI = {
+  'join me': '🔵',
+  'active': '🟢',
+  'ask me': '🟠',
+  'busy': '🔴',
+};
+
 function arrayEquals(a, b) {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
@@ -13,7 +21,7 @@ function renderUserList(users) {
 
   const userList = users
     .map(
-      (user) => `[${user.displayName}](https://vrchat.com/home/user/${user.id})`
+      (user) => `${STATUS_TO_EMOJI[user.status] ?? '❔'} [${user.displayName}](https://vrchat.com/home/user/${user.id})`
     )
     .join("\n");
 
@@ -21,7 +29,7 @@ function renderUserList(users) {
     return userList;
   }
 
-  return users.map((user) => user.displayName).join("\n");
+  return users.map((user) => `${STATUS_TO_EMOJI[user.status] ?? '❔'} ${user.displayName}`).join("\n");
 }
 
 async function postInstanceDetails(instance, users) {
