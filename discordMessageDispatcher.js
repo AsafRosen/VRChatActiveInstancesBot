@@ -15,7 +15,7 @@ function renderUserList(users) {
   
     const userList = users
       .map(
-        (user) => `${STATUS_TO_EMOJI[user.status] ?? '❔'} [${user.displayName}](https://vrchat.com/home/user/${user.id})`
+        (user) => `${STATUS_TO_EMOJI[user.status] || '❔'} [${user.displayName}](https://vrchat.com/home/user/${user.id})`
       )
       .join("\n");
   
@@ -23,7 +23,7 @@ function renderUserList(users) {
       return userList;
     }
   
-    return users.map((user) => `${STATUS_TO_EMOJI[user.status] ?? '❔'} ${user.displayName}`).join("\n");
+    return users.map((user) => `${STATUS_TO_EMOJI[user.status] || '❔'} ${user.displayName}`).join("\n");
   }
   
   export async function postInstanceDetails(instance, users) {
