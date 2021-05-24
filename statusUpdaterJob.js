@@ -8,7 +8,8 @@ export async function run() {
     const friendStatuses = await vrcBot.getOnlineFriends();
     const onlineFriends = friendStatuses
       .filter((status) => status != null)
-      .filter((status) => status.location !== "offline");
+      .filter((status) => status.location !== "offline")
+      .filter((status) => status.location !== "");
 
     discordMessageDispatcher.postOnlineFriends(onlineFriends);
 
