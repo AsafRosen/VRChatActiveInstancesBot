@@ -27,6 +27,11 @@ function renderUserList(users) {
   }
   
   export async function postInstanceDetails(instance, users) {
+    if (instance.length === 0) {
+      console.warn("Instance with empty string, ignoring");
+      return;
+    }
+
     let world, instanceDetails;
   
     world = await vrcBot.getWorldDetails(instance.split(":")[0]);
