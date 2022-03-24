@@ -21,11 +21,16 @@ async function init() {
     await statusUpdaterJob.run();
 
     jobInterval = setInterval(async () => {
-      await vrcBot.signIn();
-      await acceptFriendRequestsJob.run();
-      await statusUpdaterJob.run();
+      try {
+        await vrcBot.signIn();
+        await acceptFriendRequestsJob.run();
+        await statusUpdaterJob.run();
+      }
+      catch (ex) {
+        console.error('Error running updates', ex);
+      }
     }, 60000);
-    
+
   } catch (ex) {
     console.error("Error while initializing!", ex);
   }
