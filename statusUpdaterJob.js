@@ -11,7 +11,7 @@ export async function run() {
       .filter((status) => status.location !== "offline")
       .filter((status) => status.location !== "");
 
-    discordMessageDispatcher.postOnlineFriends(onlineFriends);
+    await discordMessageDispatcher.postOnlineFriends(onlineFriends);
 
     const joinableFriends = onlineFriends.filter(
       (status) => status.location !== "private"
@@ -33,7 +33,7 @@ export async function run() {
     );
 
     for (const [instance, users] of Object.entries(friendsByInstance)) {
-      discordMessageDispatcher.postInstanceDetails(instance, users);
+      await discordMessageDispatcher.postInstanceDetails(instance, users);
     }
 
     await discordBot.clearMessagesNotInIDs(

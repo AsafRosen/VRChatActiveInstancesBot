@@ -13,7 +13,9 @@ export async function init() {
   await client.login(process.env.DISCORD_CLIENT_TOKEN);
 
   if (!process.env.DISCORD_ACTIVITY_STATUS_CHANNEL) {
-    throw new Error("DISCORD_ACTIVITY_STATUS_CHANNEL is not set in the .env file");
+    throw new Error(
+      "DISCORD_ACTIVITY_STATUS_CHANNEL is not set in the .env file"
+    );
   }
 
   channel = await client.channels.fetch(
@@ -22,44 +24,54 @@ export async function init() {
 }
 
 export async function postMessage(content, fixedMessageId) {
-  if (fixedMessages[fixedMessageId]) {
-    const currentMessageID = fixedMessages[fixedMessageId];
-    const currentMessage = await channel.messages.fetch(currentMessageID);
-    const newMessage = await currentMessage.edit(content);
-    fixedMessages[fixedMessageId] = newMessage.id;
-  }
-  else {
-    const newMessage = await channel.send(content);
-    fixedMessages[fixedMessageId] = newMessage.id;
+  try {
+    if (fixedMessages[fixedMessageId]) {
+      const currentMessageID = fixedMessages[fixedMessageId];
+      const currentMessage = await channel.messages.fetch(currentMessageID);
+      const newMessage = await currentMessage.edit(content);
+      fixedMessages[fixedMessageId] = newMessage.id;
+    } else {
+      const newMessage = await channel.send(content);
+      fixedMessages[fixedMessageId] = newMessage.id;
+    }
+  } catch (error) {
+    delete fixedMessages[fixedMessageId];
+    console.error("Failed to post message: ", fixedMessageId, error);
   }
 }
 
 export async function clearAllBotMessages() {
-  const allMessages = await channel.messages.fetch();
-  const botMessages = allMessages.filter(m => m.author.id === client.user.id)
+  try {
+    const allMessages = await channel.messages.fetch();
+    const botMessages = allMessages.filter(
+      (m) => m.author.id === client.user.id
+    );
 
-  for (const [_, message] of botMessages) {
-    message.delete();
+    for (const [_, message] of botMessages) {
+      message.delete();
+    }
+  } catch (error) {
+    console.error("Failed to clear all bot messages", error);
   }
 }
 
 export async function clearMessagesNotInIDs(fixedMessageIds) {
-  const messagesToRemove = Object.keys(fixedMessages).filter(fixedMessage => !fixedMessageIds.includes(fixedMessage));
+  const allMessages = await channel.messages.fetch();
+  const botMessages = allMessages.filter((m) => m.author.id === client.user.id);
 
-  for (const messageToRemoveId of messagesToRemove) {
-    const messageId = fixedMessages[messageToRemoveId];
-    try {
-      const message = await channel.messages.fetch(messageId);
-      await message.delete();
+  for (const fixedMessageId of Object.keys(fixedMessages)) {
+    if (!fixedMessageIds.includes(fixedMessageId)) {
+      delete fixedMessages[fixedMessageId];
     }
-    catch (error) {
-      console.error('Failed to delete message: ', messageId);
-    }
-
-    delete fixedMessages[messageToRemoveId];
   }
-}
 
-export function getFixedMessages() {
-  return fixedMessages;
+  for (const [_, message] of botMessages) {
+    if (!Object.values(fixedMessages).includes(message.id)) {
+      try {
+        await message.delete();
+      } catch (error) {
+        console.error("Failed to delete message: ", messageId);
+      }
+    }
+  }
 }
