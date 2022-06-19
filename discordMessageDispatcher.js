@@ -36,11 +36,12 @@ function renderUserList(users) {
   
     world = await vrcBot.getWorldDetails(instance.split(":")[0]);
     instanceDetails = await vrcBot.getInstanceDetails(instance);
+    const title = `${world.name} ${instanceDetails.name}`;
   
     await discordBot.postMessage(
       {
         embed: {
-          title: `${world.name} ${instanceDetails.name}`,
+          title: title,
           url: `https://vrchat.com/home/launch?worldId=${
             world.id
           }&instanceId=${encodeURIComponent(instanceDetails.instanceId)}`,
@@ -56,9 +57,10 @@ function renderUserList(users) {
             url: world.imageUrl,
           },
         },
-      },
-      instance
+      }
     );
+
+    return title;
   }
   
   export async function postOnlineFriends(onlineFriends) {
@@ -76,6 +78,7 @@ function renderUserList(users) {
           ],
         },
       },
-      "online"
     );
+
+    return "Online People";
   }

@@ -3,8 +3,6 @@ import Discord from "discord.js";
 const client = new Discord.Client();
 let channel = null;
 
-const fixedMessages = {};
-
 export async function init() {
   if (!process.env.DISCORD_CLIENT_TOKEN) {
     throw new Error("DISCORD_CLIENT_TOKEN is not set in the .env file");
@@ -23,20 +21,16 @@ export async function init() {
   );
 }
 
-export async function postMessage(content, fixedMessageId) {
+export async function postMessage(content) {
   try {
-    if (fixedMessages[fixedMessageId]) {
-      const currentMessageID = fixedMessages[fixedMessageId];
-      const currentMessage = await channel.messages.fetch(currentMessageID);
-      const newMessage = await currentMessage.edit(content);
-      fixedMessages[fixedMessageId] = newMessage.id;
+    const existingMessage = await getMessageByTitle(content.embed.title);
+    if (existingMessage) {
+      await existingMessage.edit(content);
     } else {
-      const newMessage = await channel.send(content);
-      fixedMessages[fixedMessageId] = newMessage.id;
+      await channel.send(content);
     }
   } catch (error) {
-    delete fixedMessages[fixedMessageId];
-    console.error("Failed to post message: ", fixedMessageId, error);
+    console.error("Failed to post message: ", content.embed.title, error);
   }
 }
 
@@ -55,23 +49,34 @@ export async function clearAllBotMessages() {
   }
 }
 
-export async function clearMessagesNotInIDs(fixedMessageIds) {
+export async function clearMessagesNotInTitles(titles) {
   const allMessages = await channel.messages.fetch();
   const botMessages = allMessages.filter((m) => m.author.id === client.user.id);
 
-  for (const fixedMessageId of Object.keys(fixedMessages)) {
-    if (!fixedMessageIds.includes(fixedMessageId)) {
-      delete fixedMessages[fixedMessageId];
+  for (const [_, message] of botMessages) {
+    const currentMessageTitle = message.embeds[0]?.title;
+
+    if (!currentMessageTitle || titles.includes(currentMessageTitle)) {
+      continue;
+    }
+
+    try {
+      await message.delete();
+    } catch (error) {
+      console.error("Failed to delete message: ", messageId);
     }
   }
+}
 
-  for (const [_, message] of botMessages) {
-    if (!Object.values(fixedMessages).includes(message.id)) {
-      try {
-        await message.delete();
-      } catch (error) {
-        console.error("Failed to delete message: ", messageId);
-      }
-    }
+async function getMessageByTitle(title) {
+  try {
+    const allMessages = await channel.messages.fetch();
+    const botMessages = allMessages.filter(
+      (m) => m.author.id === client.user.id
+    );
+
+    return botMessages.find((m) => m.embeds[0]?.title === title);
+  } catch (error) {
+    console.error("Failed to get message by Title", title, error);
   }
 }

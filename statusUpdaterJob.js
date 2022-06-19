@@ -11,7 +11,9 @@ export async function run() {
       .filter((status) => status.location !== "offline")
       .filter((status) => status.location !== "");
 
-    await discordMessageDispatcher.postOnlineFriends(onlineFriends);
+    const onlineFriendsTitle = await discordMessageDispatcher.postOnlineFriends(
+      onlineFriends
+    );
 
     const joinableFriends = onlineFriends.filter(
       (status) => status.location !== "private"
@@ -32,13 +34,21 @@ export async function run() {
       {}
     );
 
-    for (const [instance, users] of Object.entries(friendsByInstance)) {
-      await discordMessageDispatcher.postInstanceDetails(instance, users);
-    }
-
-    await discordBot.clearMessagesNotInIDs(
-      Object.keys(friendsByInstance).concat(["online"])
+    const instanceTitles = await Promise.all(
+      Object.keys(friendsByInstance).map(async (instance) => {
+        const users = friendsByInstance[instance];
+        return await discordMessageDispatcher.postInstanceDetails(
+          instance,
+          users
+        );
+      })
     );
+
+    const activeTitles = [...instanceTitles, onlineFriendsTitle];
+
+    console.log("Current active titles", activeTitles);
+
+    await discordBot.clearMessagesNotInTitles(activeTitles);
   } catch (error) {
     console.error("Update job failed", error.message);
   }

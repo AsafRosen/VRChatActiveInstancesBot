@@ -14,7 +14,6 @@ async function init() {
     webserver.init();
 
     await discordBot.init();
-    await discordBot.clearAllBotMessages();
 
     await vrcBot.signIn();
     await acceptFriendRequestsJob.run();
