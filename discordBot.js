@@ -1,6 +1,6 @@
 import Discord from "discord.js";
 
-const client = new Discord.Client();
+const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILD_MESSAGES] });
 let channel = null;
 
 export async function init() {
@@ -8,6 +8,7 @@ export async function init() {
     throw new Error("DISCORD_CLIENT_TOKEN is not set in the .env file");
   }
 
+  client.on("ready", () => console.log("Login Ready Event"));
   await client.login(process.env.DISCORD_CLIENT_TOKEN);
 
   if (!process.env.DISCORD_ACTIVITY_STATUS_CHANNEL) {
@@ -23,14 +24,14 @@ export async function init() {
 
 export async function postMessage(content) {
   try {
-    const existingMessage = await getMessageByTitle(content.embed.title);
+    const existingMessage = await getMessageByTitle(content.embeds[0].title);
     if (existingMessage) {
       await existingMessage.edit(content);
     } else {
       await channel.send(content);
     }
   } catch (error) {
-    console.error("Failed to post message: ", content.embed.title, error);
+    console.error("Failed to post message: ", content.embeds[0].title, error);
   }
 }
 

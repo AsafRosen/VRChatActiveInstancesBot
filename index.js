@@ -3,36 +3,36 @@ import * as discordBot from "./discordBot.js";
 import * as statusUpdaterJob from "./statusUpdaterJob.js";
 import * as acceptFriendRequestsJob from "./acceptFriendRequestsJob.js";
 import * as vrcBot from "./vrcBot.js";
-import * as webserver from "./webserver.js";
 
 dotenv.config();
 
-let jobInterval;
-
 async function init() {
   try {
-    webserver.init();
-
+    console.info("Starting Bot");
     await discordBot.init();
+    console.info("Discord Bot API initialized");
 
-    await vrcBot.signIn();
-    await acceptFriendRequestsJob.run();
-    await statusUpdaterJob.run();
+    await runBot();
 
-    jobInterval = setInterval(async () => {
-      try {
-        await vrcBot.signIn();
-        await acceptFriendRequestsJob.run();
-        await statusUpdaterJob.run();
-      }
-      catch (ex) {
-        console.error('Error running updates', ex);
-      }
-    }, 60000);
-
+    setInterval(async () => {
+      await runBot();
+    }, 120000);
   } catch (ex) {
-    console.error("Error while initializing!", ex);
+    console.error("Error while running job!", ex);
   }
 }
 
-init();
+async function runBot() {
+  try {
+    await vrcBot.signIn();
+    console.info("VRChat API initialized");
+    await acceptFriendRequestsJob.run();
+    console.info("Accepted Friend Requests");
+    await statusUpdaterJob.run();
+    console.info("Finished Status Update");
+  } catch (ex) {
+    console.error("Error while running job!", ex);
+  }
+}
+
+init().then(() =>{});
